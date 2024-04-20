@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+
+     <style>
+        #ISSmap { height: 180px; }
+     </style>   
+    <title>Document</title>
+</head>
+<body>
+    <h1>where is my ISS</h1>
+    <p> 
+        latitude: <span id="lat"></span> <br> 
+        longitude: <span id="lon"></span> <br>
+        day or night: <span id="dn"></span> <br>
+        velocity: <span id="vs"></span> 
+    </p>
+
+    <div id="ISSmap"></div>
+
+    <script>
+
+        const map = L.map('ISSmap').setView([0, 0], 1);
+        const marker = L.marker([0, 0]).addTo(map);
+        const tileUrl = 'https:{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        const attrbution = '&copy; <a href = "https://www.openstreetmap.org/copyright"> OpenStreetMap<a> contrbutors';
+        const tiles = L.tileLayer(tileUrl, {attrbution});
+        tiles.addTo(map);        
+        const api_url = 'https://api.wheretheiss.at/v1/satellites/25544';
+        firstTime = true;
+        async function getIss(){
+            const response = await fetch(api_url);
+            const data = await response.json();
+            //console.log(data)
+            const {latitude, longitude, visibility, velocity} = data
+
+            marker.setLatLng([latitude,longitude]);
+            if(firstTime){
+                 map.setView([latitude,longitude],2);
+                 firstTime = false   
+            }
+            document.getElementById('lat').textContent = latitude;
+            document.getElementById('lon').textContent = longitude;
+            document.getElementById('dn').textContent = visibility;
+            document.getElementById('vs').textContent = velocity
+        };
+
+        getIss();
+
+        setInterval(getIss,2000);
+
+    </script>
+
+</body>
+</html>
